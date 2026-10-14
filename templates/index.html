@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EstateAI — House Price Prediction</title>
+<link rel="stylesheet"
+      href="{{ url_for('static', path='/style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+</head>
+
+<body>
+<div class="app-shell">
+
+    <aside class="sidebar">
+        <a href="/" class="brand">
+            <span class="brand-mark">E</span>
+            <span>Estate<span class="brand-accent">AI</span></span>
+        </a>
+
+        <div class="sidebar-divider"></div>
+
+        <p class="sidebar-label">WORKSPACE</p>
+
+        <a href="/" class="nav-item active">
+            <span class="nav-icon">⌂</span>
+            <span>Price Predictor</span>
+        </a>
+
+        <a href="/docs" class="nav-item">
+            <span class="nav-icon">⌘</span>
+            <span>API Documentation</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="model-card">
+                <span class="online-indicator"></span>
+                <div>
+                    <strong>Prediction Model</strong>
+                    <p>Ready to estimate</p>
+                </div>
+            </div>
+
+            <p class="sidebar-footer">ESTATEAI · VERSION 1.0</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <p class="breadcrumb">Workspace <span>/</span> Price Predictor</p>
+                <p class="topbar-caption">California real estate intelligence</p>
+            </div>
+
+            <div class="topbar-badge">
+                <span class="online-indicator"></span>
+                System operational
+            </div>
+        </header>
+
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">PROPERTY VALUATION</p>
+                <h1>House Price Predictor</h1>
+                <p class="page-description">
+                    Enter property information to estimate its market value
+                    using your trained machine learning model.
+                </p>
+            </div>
+        </section>
+
+        {% if error %}
+        <div class="alert alert-error" role="alert">
+            <span class="alert-icon">!</span>
+            <div>
+                <strong>Prediction failed</strong>
+                <p>{{ error }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <section class="workspace-grid">
+
+            <div class="panel form-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Property information</h2>
+                        <p>Complete all fields to generate an estimate.</p>
+                    </div>
+                    <span class="required-label">9 INPUT FEATURES</span>
+                </div>
+
+                <form action="/predict" method="post" id="predictionForm">
+
+                    <div class="form-section">
+                        <div class="section-heading">
+                            <span class="section-index">01</span>
+                            <div>
+                                <h3>Location</h3>
+                                <p>Geographic position and surroundings</p>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+
+                            <div class="field">
+                                <label for="longitude">Longitude</label>
+                                <input
+                                    id="longitude"
+                                    name="longitude"
+                                    type="number"
+                                    step="any"
+                                    value="{{ form_data.longitude if form_data else '-122.23' }}"
+                                    placeholder="-122.23"
+                                    required>
+                                <small>Example: -122.23</small>
+                            </div>
+
+                            <div class="field">
+                                <label for="latitude">Latitude</label>
+                                <input
+                                    id="latitude"
+                                    name="latitude"
+                                    type="number"
+                                    step="any"
+                                    value="{{ form_data.latitude if form_data else '37.88' }}"
+                                    placeholder="37.88"
+                                    required>
+                                <small>Example: 37.88</small>
+                            </div>
+
+                            <div class="field field-full">
+                                <label for="ocean_proximity">Ocean proximity</label>
+                                <select id="ocean_proximity"
+                                        name="ocean_proximity" required>
+                                    <option value="INLAND"
+                                        {% if form_data and form_data.ocean_proximity == 'INLAND' %}selected{% endif %}>
+                                        INLAND
+                                    </option>
+                                    <option value="NEAR BAY"
+                                        {% if form_data and form_data.ocean_proximity == 'NEAR BAY' %}selected{% endif %}>
+                                        NEAR BAY
+                                    </option>
+                                    <option value="NEAR OCEAN"
+                                        {% if form_data and form_data.ocean_proximity == 'NEAR OCEAN' %}selected{% endif %}>
+                                        NEAR OCEAN
+                                    </option>
+                                    <option value="ISLAND"
+                                        {% if form_data and form_data.ocean_proximity == 'ISLAND' %}selected{% endif %}>
+                                        ISLAND
+                                    </option>
+                                    <option value="&lt;1H OCEAN"
+                                        {% if form_data and form_data.ocean_proximity == '<1H OCEAN' %}selected{% endif %}>
+                                        &lt;1H OCEAN
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-heading">
+                            <span class="section-index">02</span>
+                            <div>
+                                <h3>Housing details</h3>
+                                <p>Age and household income</p>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+
+                            <div class="field">
+                                <label for="housing_median_age">Median housing age</label>
+                                <input
+                                    id="housing_median_age"
+                                    name="housing_median_age"
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value="{{ form_data.housing_median_age if form_data else '25' }}"
+                                    placeholder="25"
+                                    required>
+                            </div>
+
+                            <div class="field">
+                                <label for="median_income">Median income</label>
+                                <input
+                                    id="median_income"
+                                    name="median_income"
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value="{{ form_data.median_income if form_data else '5.2' }}"
+                                    placeholder="5.2"
+                                    required>
+                                <small>Use the dataset's original units.</small>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-heading">
+                            <span class="section-index">03</span>
+                            <div>
+                                <h3>Rooms and population</h3>
+                                <p>Characteristics of the housing area</p>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+
+                            <div class="field">
+                                <label for="total_rooms">Total rooms</label>
+                                <input
+                                    id="total_rooms"
+                                    name="total_rooms"
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value="{{ form_data.total_rooms if form_data else '1800' }}"
+                                    placeholder="1800"
+                                    required>
+                            </div>
+
+                            <div class="field">
+                                <label for="total_bedrooms">Total bedrooms</label>
+                                <input
+                                    id="total_bedrooms"
+                                    name="total_bedrooms"
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value="{{ form_data.total_bedrooms if form_data else '350' }}"
+                                    placeholder="350"
+                                    required>
+                            </div>
+
+                            <div class="field">
+                                <label for="population">Population</label>
+                                <input
+                                    id="population"
+                                    name="population"
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value="{{ form_data.population if form_data else '900' }}"
+                                    placeholder="900"
+                                    required>
+                            </div>
+
+                            <div class="field">
+                                <label for="households">Households</label>
+                                <input
+                                    id="households"
+                                    name="households"
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value="{{ form_data.households if form_data else '320' }}"
+                                    placeholder="320"
+                                    required>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <p>All 9 model features are required.</p>
+                        <button type="submit" id="predictButton">
+                            <span>Generate prediction</span>
+                            <span class="button-arrow">→</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+            <aside class="right-column">
+
+                <div class="panel result-panel">
+                    <div class="result-heading">
+                        <div>
+                            <p class="eyebrow">MODEL OUTPUT</p>
+                            <h2>Estimated value</h2>
+                        </div>
+                        <span class="result-symbol">$</span>
+                    </div>
+
+                    {% if prediction is not none %}
+                        <div class="result-success">
+                            <span class="result-label">Predicted house price</span>
+                            <div class="result-price">
+                                ${{ "{:,.2f}".format(prediction) }}
+                            </div>
+                            <p class="result-help">
+                                Estimate generated from the submitted property
+                                features.
+                            </p>
+                            <div class="result-status">
+                                <span class="online-indicator"></span>
+                                Prediction completed
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="result-empty">
+                            <div class="empty-illustration" aria-hidden="true">
+                                <div class="illustration-building">
+                                    <span></span><span></span>
+                                    <span></span><span></span>
+                                    <span></span><span></span>
+                                </div>
+                                <div class="illustration-base"></div>
+                            </div>
+                            <h3>Your estimate will appear here</h3>
+                            <p>
+                                Complete the property form and generate a
+                                prediction to see the model's output.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <div class="result-note">
+                        <strong>Important</strong>
+                        <p>
+                            This is a machine learning estimate, not a
+                            guaranteed selling price or professional appraisal.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="panel info-panel">
+                    <div class="info-icon">i</div>
+                    <div>
+                        <h3>About this prediction</h3>
+                        <p>
+                            The model uses location, housing, income,
+                            room-count and population features.
+                        </p>
+                        <a href="/docs">View API documentation ↗</a>
+                    </div>
+                </div>
+
+            </aside>
+
+        </section>
+
+        <footer class="page-footer">
+            <span>EstateAI · House Price Prediction</span>
+            <span>Powered by FastAPI &amp; scikit-learn</span>
+        </footer>
+
+    </main>
+</div>
+
+<script>
+    const form = document.getElementById("predictionForm");
+    const button = document.getElementById("predictButton");
+
+    form.addEventListener("submit", function () {
+        if (!form.checkValidity()) {
+            return;
+        }
+
+        button.disabled = true;
+        button.querySelector("span:first-child").textContent =
+            "Generating prediction...";
+        button.querySelector(".button-arrow").textContent = "…";
+    });
+</script>
+
+</body>
+</html>
