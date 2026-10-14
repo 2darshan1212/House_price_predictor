@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/favicon.svg') }}">
+<meta name="theme-color" content="#07111f">
     <title>EstateAI — House Price Prediction</title>
 <link rel="stylesheet"
       href="{{ url_for('static', path='/style.css') }}">
@@ -16,6 +17,17 @@
 </head>
 
 <body>
+    <div id="intro-screen" aria-label="Loading House Price Predictor">
+  <div class="intro-content">
+    <div class="intro-logo">⌂</div>
+    <h1>Estate<span>AI</span></h1>
+    <p>CALIFORNIA REAL ESTATE INTELLIGENCE</p>
+    <div class="intro-loader">
+      <div class="intro-loader-fill"></div>
+    </div>
+    <span class="intro-status">Preparing your experience...</span>
+  </div>
+</div>
 <div class="app-shell">
 
     <aside class="sidebar">
@@ -378,6 +390,26 @@
         button.querySelector(".button-arrow").textContent = "…";
     });
 </script>
+<script>
+  (() => {
+    const intro = document.getElementById("intro-screen");
+    if (!intro) return;
 
+    const hideIntro = () => {
+      intro.classList.add("intro-hidden");
+      intro.setAttribute("aria-hidden", "true");
+    };
+
+    // Show the intro briefly, then reveal the page.
+    window.addEventListener("load", () => {
+      window.setTimeout(hideIntro, 1600);
+    }, { once: true });
+
+    // Fallback in case loading events have already fired.
+    if (document.readyState === "complete") {
+      window.setTimeout(hideIntro, 1600);
+    }
+  })();
+</script>
 </body>
 </html>
